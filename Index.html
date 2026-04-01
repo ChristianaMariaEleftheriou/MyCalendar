@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Calendar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="authPage" class="screen-center">
+    <div class="container">
+
+      <div id="welcome">
+        <h1>My Calendar</h1>
+        <p class="subtitle">organize your life</p>
+        <button class="login-btn" onclick="showLogin()">Log In</button>
+        <button class="signup-btn" onclick="showSignup()">Sign Up</button>
+      </div>
+
+      <div id="login" style="display:none;">
+        <button class="back-arrow" onclick="goBack()">←</button>
+        <h2 class="form-title">Log In</h2>
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button class="submit-btn" onclick="logInUser()">Log In</button>
+      </div>
+
+      <div id="signup" style="display:none;">
+        <button class="back-arrow" onclick="goBack()">←</button>
+        <h2 class="form-title">Sign Up</h2>
+        <input type="email" id="signupEmail" placeholder="Email">
+        <input type="password" id="signupPassword" placeholder="Password">
+        <button class="submit-btn" onclick="signUpUser()">Create Account</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="calendarPage">
+    <div class="calendar-topbar">
+      <div class="week-nav">
+        <button class="nav-arrow" onclick="previousWeek()">←</button>
+        <div>
+          <h2 class="week-title">This Week</h2>
+          <div class="week-range" id="weekRange"></div>
+        </div>
+        <button class="nav-arrow" onclick="nextWeek()">→</button>
+      </div>
+
+      <div class="topbar-buttons">
+        <button class="toggle-btn" id="toggleWeekendBtn" onclick="toggleWeekend()">Weekdays Only</button>
+        <button class="toggle-btn add-btn" onclick="openAddPanel()">+ Add</button>
+        <button class="toggle-btn" onclick="openEditSearch()">Edit</button>
+        <button class="toggle-btn signout-btn" onclick="signOutUser()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- ADD EVENT PANEL -->
+    <div id="addEventPanel" class="add-event-panel" style="display:none;">
+      <div class="add-event-header">
+        <h3>Add Event</h3>
+        <button class="close-panel-btn" onclick="closeAddPanel()">×</button>
+      </div>
+
+      <div class="form-group">
+        <label for="eventTitle">Add</label>
+        <input type="text" id="eventTitle" oninput="toggleHint('eventTitle','hintTitle')">
+        <div class="input-hint" id="hintTitle">i.e. Microbiology II</div>
+      </div>
+
+      <div class="form-group suggestion-group">
+        <label for="eventWhen">When</label>
+        <input type="text" id="eventWhen" oninput="handleWhenInput()">
+        <div class="input-hint" id="hintWhen">i.e. Monday, weekdays, 22/12/25</div>
+        <div class="suggestions-box" id="whenSuggestions"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="eventTime">Time</label>
+        <input type="text" id="eventTime" oninput="toggleHint('eventTime','hintTime')">
+        <div class="input-hint" id="hintTime">i.e. 11:00-12:00</div>
+      </div>
+
+      <div class="form-group">
+        <label for="repeatSelect">Repeat</label>
+
+        <select id="repeatSelect" onchange="handleRepeatSelectChange()">
+          <option value="">None</option>
+          <option value="every week">Every week</option>
+          <option value="every 2 weeks">Every 2 weeks</option>
+          <option value="every 3 weeks">Every 3 weeks</option>
+          <option value="every 4 weeks">Every 4 weeks</option>
+          <option value="every 5 weeks">Every 5 weeks</option>
+          <option value="everyday">Every day</option>
+          <option value="4 weeks">4 weeks</option>
+          <option value="4 months">4 months</option>
+          <option value="4 years">4 years</option>
+          <option value="forever">Forever</option>
+          <option value="custom">Custom</option>
+        </select>
+
+        <input type="text" id="eventRepeat" style="display:none; margin-top:10px;" oninput="toggleHint('eventRepeat','hintRepeat')">
+        <div class="input-hint" id="hintRepeat">i.e. every week, every 2 weeks, 4 weeks</div>
+      </div>
+
+      <div class="form-group">
+        <label for="untilSelect">Until</label>
+
+        <select id="untilSelect" onchange="handleUntilSelectChange()">
+          <option value="">None</option>
+          <option value="end of week">End of this week</option>
+          <option value="end of month">End of month</option>
+          <option value="end of next month">End of next month</option>
+          <option value="custom">Specific date</option>
+        </select>
+
+        <input type="text" id="eventUntil" style="display:none; margin-top:10px;" oninput="toggleHint('eventUntil','hintUntil')">
+        <div class="input-hint" id="hintUntil">i.e. 22/12/25</div>
+      </div>
+
+      <div class="form-group">
+        <label for="eventExclude">Exclude</label>
+        <input type="text" id="eventExclude" oninput="toggleHint('eventExclude','hintExclude')">
+        <div class="input-hint" id="hintExclude">i.e. Easter break</div>
+      </div>
+
+      <label class="flexible-option">
+        <input type="checkbox" id="flexibleEvent">
+        Flexible time
+      </label>
+
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-picker" id="eventColorPicker">
+          <button type="button" class="color-option selected" data-color="#f7d7ec" style="background:#f7d7ec;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#f8e7a8" style="background:#f8e7a8;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#d6f5e3" style="background:#d6f5e3;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#d9e8fb" style="background:#d9e8fb;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#e7d9fb" style="background:#e7d9fb;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#ffd9c7" style="background:#ffd9c7;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#ffe7ef" style="background:#ffe7ef;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#dff4ff" style="background:#dff4ff;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#e8f0c8" style="background:#e8f0c8;" onclick="selectEventColor(this)"></button>
+          <button type="button" class="color-option" data-color="#f3e0d6" style="background:#f3e0d6;" onclick="selectEventColor(this)"></button>
+        </div>
+        <input type="hidden" id="eventColor" value="#f7d7ec">
+      </div>
+
+      <button class="submit-btn panel-add-btn" onclick="addEvent()">Add Event</button>
+    </div>
+
+    <!-- EDIT SEARCH PANEL -->
+    <div id="editSearchPanel" class="add-event-panel" style="display:none;">
+      <div class="add-event-header">
+        <h3>Find Event to Edit</h3>
+        <button class="close-panel-btn" onclick="closeEditSearch()">×</button>
+      </div>
+
+      <div class="form-group">
+        <label for="editSearchInput">Search event</label>
+        <input type="text" id="editSearchInput" placeholder="Type title or date..." oninput="renderEditSearchResults()">
+      </div>
+
+      <div id="editSearchResults"></div>
+    </div>
+
+    <!-- EDIT EVENT PANEL -->
+    <div id="editEventPanel" class="add-event-panel" style="display:none;">
+      <div class="add-event-header">
+        <h3>Edit Event</h3>
+        <button class="close-panel-btn" onclick="closeEditPanel()">×</button>
+      </div>
+
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="editTitle">
+      </div>
+
+      <div class="form-group">
+        <label>Date</label>
+        <input type="text" id="editDate">
+      </div>
+
+      <div class="form-group">
+        <label>Time</label>
+        <input type="text" id="editTime">
+      </div>
+
+      <div class="form-group">
+        <label>Repeat</label>
+        <input type="text" id="editRepeat">
+      </div>
+
+      <div class="form-group">
+        <label>Until</label>
+        <input type="text" id="editUntil">
+      </div>
+
+      <div class="form-group">
+        <label>Exclude</label>
+        <input type="text" id="editExclude">
+      </div>
+
+      <label class="flexible-option">
+        <input type="checkbox" id="editFlexible">
+        Flexible
+      </label>
+
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-picker" id="editEventColorPicker">
+          <button type="button" class="color-option edit-color-option" data-color="#f7d7ec" style="background:#f7d7ec;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#f8e7a8" style="background:#f8e7a8;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#d6f5e3" style="background:#d6f5e3;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#d9e8fb" style="background:#d9e8fb;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#e7d9fb" style="background:#e7d9fb;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#ffd9c7" style="background:#ffd9c7;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#ffe7ef" style="background:#ffe7ef;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#dff4ff" style="background:#dff4ff;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#e8f0c8" style="background:#e8f0c8;" onclick="selectEditEventColor(this)"></button>
+          <button type="button" class="color-option edit-color-option" data-color="#f3e0d6" style="background:#f3e0d6;" onclick="selectEditEventColor(this)"></button>
+        </div>
+        <input type="hidden" id="editEventColor" value="#f7d7ec">
+      </div>
+
+      <button class="submit-btn" onclick="saveEditedEvent()">Save Changes</button>
+    </div>
+
+    <div class="week-view" id="weekView">
+
+      <div class="day-column">
+        <div class="day-name" id="dayName0">Monday</div>
+        <div class="day-date" id="dayDate0"></div>
+        <div class="day-content" id="Monday"></div>
+      </div>
+
+      <div class="day-column">
+        <div class="day-name" id="dayName1">Tuesday</div>
+        <div class="day-date" id="dayDate1"></div>
+        <div class="day-content" id="Tuesday"></div>
+      </div>
+
+      <div class="day-column">
+        <div class="day-name" id="dayName2">Wednesday</div>
+        <div class="day-date" id="dayDate2"></div>
+        <div class="day-content" id="Wednesday"></div>
+      </div>
+
+      <div class="day-column">
+        <div class="day-name" id="dayName3">Thursday</div>
+        <div class="day-date" id="dayDate3"></div>
+        <div class="day-content" id="Thursday"></div>
+      </div>
+
+      <div class="day-column">
+        <div class="day-name" id="dayName4">Friday</div>
+        <div class="day-date" id="dayDate4"></div>
+        <div class="day-content" id="Friday"></div>
+      </div>
+
+      <div class="day-column weekend-day" id="saturdayColumn">
+        <div class="day-name" id="dayName5">Saturday</div>
+        <div class="day-date" id="dayDate5"></div>
+        <div class="day-content" id="Saturday"></div>
+      </div>
+
+      <div class="day-column weekend-day" id="sundayColumn">
+        <div class="day-name" id="dayName6">Sunday</div>
+        <div class="day-date" id="dayDate6"></div>
+        <div class="day-content" id="Sunday"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
